@@ -3,11 +3,11 @@
 
 hitd is a microservices toolkit in Node.JS, similar in some points to [Seneca](https://github.com/rjrodger/seneca) and/or [Micromono](https://github.com/lsm/micromono) , [Spinal](https://github.com/jitta/spinal).
 
-__The initial choices we made was using [ZeroMQ](http://zeromq.org) for communication, and using a request-responses paradigme.__
+__The initial choices we made was using [ZeroMQ](http://zeromq.org) for communication, and using a request-responses paradigm.__
 More precisely, It is based on [Pigato](https://github.com/prdn/pigato), who does an amazing jobs handling all the low level stuff.
 
 #How is that Different ?
-Hitd means 'How Is That Different' because when presenting early version of the project to some fellow devellopers from all background, How is that Different from X ? was the single questions they had in mind. We will in this introduction mainly try to answer this questions.
+Hitd means 'How Is That Different' because when presenting early version of the project to some fellow developers from all background, How is that Different from X ? was the single questions they had in mind. We will in this introduction mainly try to answer this questions.
 
  - Vertically Oriented
  - Great Tooling
@@ -16,53 +16,51 @@ Hitd means 'How Is That Different' because when presenting early version of the 
  - Not so opinionated
 
 
- ##Vertically Oriented
+##Vertically Oriented
 
- The main goal of _hitd_ is to reduce the gap between specification and and implementation.
- For the first step if the implemntaiton, It looked a lot at others microservices solutions, focusing on the architecure and communication between nodes.
- With time, we added layers in order to focus less on developpers and more on product manager.he final goal, but we are still very far from it, would be to transform specification to code.
- For example, We are currently working on a graph based interface for building  microservices architecure.
+The main goal of _hitd_ is to reduce the gap between specification and implementation.
+For the first step of the implementation, It looked a lot at others microservices solutions, focusing on the architecture and communication between nodes.
+With time, we added layers in order to focus less on developers and more on product manager. The final goal, but we are still very far from it, would be to transform specification to code.
+For example, We are currently working on a graph based interface for building  microservices architecture.
 
- ##Great Tooling
- Because we add abstraction layers does'nt mean we forget developpers. We know that you sometimes have no better choice than to write code. Code reusability and sexy graphical interface are not a golden bullet. We want you to be confortable writing and running some code running on the of hitd.
+##Great Tooling
+Because we add abstraction layers doesn't mean we forget developers. We know that you sometimes have no better choice than to write code. Code reusability and sexy graphical interface are not a golden bullet. We want you to be comfortable writing and running some code running on top of hitd.
 
- One of the tools we love the most, is hitd-reload. It allows you to dynamicaly live reload microservices while the code is changing. Awesome for delivery, but mainly for developements, where you will gain a lot of time.
+One of the tools we love the most, is `hitd-reload`. It allows you to dynamically live reload microservices while the code is changing. Awesome for delivery, but mainly for developements, where you will gain a lot of time.
 
- We also developed so tools to dynamicaly install and load a microservices on a node.
+We also developed some tools to dynamically install and load a microservices on a node.
 
+## Nanoservice Compliant
 
- ## Nano Service Compliant
-
- A big challenge when switching from a monolyth application to a distributed application is defined the size of the slices of application once cutted. We don't provide a full answer to that question, but you can relax, you won't have a huge performance overhead because of too many very small micro-service, aka nanoservices.
-
-
- ## Build for Scalability
-
- The same way we are confident about building nanoservices, we are confident about the fact that you can make scalable software with _hitd_. Programmatically, there is no difference between reaching a local or a remote service :  all you have to do is a change in configuration.
- Moreover, for complexe sofware, you can safely design your dataflow to change the location of processing.
-
- ## Not So opinionated
-
- Of course, when designing complex sofware you have to make some choices.
- Our initial choice was made to focus on simplicity, scalability.
- We also wanted customization to be easily defined by configuration and not having to change the code.
+A big challenge when switching from a monolithic application to a distributed application is to defined the size of the slices of application once cutted. We don't provide a full answer to that question, but you can relax, you won't have a huge performance overhead because of too many very small microservices, aka nanoservices.
 
 
- _Hitd_ is designed for orchestration, but there is solution to do choreography, or doing flow bade programming à la [noFlo](http://noflojs.org).
+## Build for Scalability
 
- # Usage
+The same way we are confident about building nanoservices, we are confident about the fact that you can make scalable software with _hitd_. Programmatically, there is no difference between reaching a local or a remote service :  all you have to do is a change in configuration.
+Moreover, for complex softwares, you can safely design your dataflow to change the location of processing.
 
- You can use _hitd_ the same way as others node.js micro-service library. In fact, as already mentioned, hitd is based on Pigato, and can be used in a very similar way.
- In order to build a first application, you need too use the 3 main technical components :
-  - hitd-router :
-  - hitd-client :
-  - hitd-handler :
+## Not So Opinionated
 
- Hitd-router is both the simple and most complicated components. It is currently an instance off pigato Broker. His goal is to transmit message between nodes, and deals with balancing.
+Of course, when designing complex softwares you have to make some choices.
+Our initial choice was made to focus on simplicity, scalability.
+We also wanted customization to be easily defined by configuration and not having to change the code.
 
- Hitd-client is the part of hitd responisble for emiting request, and wainting for reply
+_Hitd_ is designed for orchestration, but there is solution to do choreography, or doing flow based programming à la [noFlo](http://noflojs.org).
 
- Hitd-handler allow to register a function when receiving a request for an associated path. The associated function can do some work, dans reponde to the request. Of course a function associated to and handler car instance a client to emit new queries. This is the way we build application based on several services.
+# Usage
+
+You can use _hitd_ the same way as others node.js micro-service library. In fact, as already mentioned, _hitd_ is based on _Pigato_, and can be used in a very similar way.
+In order to build a first application, you need too use the 3 main technical components :
+  * hitd-router :
+  * hitd-client :
+  * hitd-handler :
+
+`Hitd-router` is both the most simple and most complicated components. It is currently an instance of _Pigato_ Broker. His goal is to transmit message between nodes, and deal with balancing.
+
+`Hitd-client` is the part of _hitd_ responsible for emitting request, and waiting for reply
+
+`Hitd-handler` allows to register a function when receiving a request for an associated path. The associated function can do some work, and respond to the request. Of course a function associated to an handler can instantiate a client to emit new queries. This is the way we build application based on several services.
 
 
 ```javascript
@@ -102,5 +100,5 @@ Router(endpoint , conf , function(err, router){
 
 
 
- ## : Hits bundle some tools, usable from developement stage to production.
- ## : Hits bundle some tools, usable from developement stage to production.## : Hits bundle some tools, usable from developement stage to production.## : Hits bundle some tools, usable from developement stage to production.## : Hits bundle some tools, usable from developement stage to production.
+## : Hits bundle some tools, usable from developement stage to production.
+## : Hits bundle some tools, usable from developement stage to production.## : Hits bundle some tools, usable from developement stage to production.## : Hits bundle some tools, usable from developement stage to production.## : Hits bundle some tools, usable from developement stage to production.
