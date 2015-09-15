@@ -23,28 +23,57 @@ For the first step of the implementation, It looked a lot at others microservice
 With time, we added layers in order to focus less on developers and more on product manager. The final goal, but we are still very far from it, would be to transform specification to code.
 For example, We are currently working on a graph based interface for building  microservices architecture.
 
+>!--- etn:
+In my opinion, it is confusing to retrace the history to justify your approach.
+The first sentence is good.
+But I fail to see the verticallity you mention.
+Is it from hardware to software, or from developers to project manager ?
+-->
+
 ##Great Tooling
 Because we add abstraction layers doesn't mean we forget developers. We know that you sometimes have no better choice than to write code. Code reusability and sexy graphical interface are not a golden bullet. We want you to be comfortable writing and running some code running on top of hitd.
 
-One of the tools we love the most, is `hitd-reload`. It allows you to dynamically live reload microservices while the code is changing. Awesome for delivery, but mainly for developements, where you will gain a lot of time.
+<!--- etn:
+If I understood correctly, you could say that hitd allows to modify the architecture at different layer.
+-->
 
-We also developed some tools to dynamically install and load a microservices on a node.
+One of the tools we love the most, is `hitd-reload`. It allows you to dynamically live reload microservices while the code is changing. Awesome for delivery, but mainly for developments, where you will gain a lot of time.
+
+We also developed some tools to dynamically install and load a microservice on a node.
+
+<!--- etn:
+We could maybe be more exhaustive here, and point to more in-depth description below.
+-->
 
 ## Nanoservice Compliant
 
 A big challenge when switching from a monolithic application to a distributed application is to defined the size of the slices of application once cutted. We don't provide a full answer to that question, but you can relax, you won't have a huge performance overhead because of too many very small microservices, aka nanoservices.
 
+<!--- etn:
+Isn't performance more attractive than just nanoservice compliance ?
+nanoservice compliance is just a by-product of your focus on performance, right ? 
+-->
 
 ## Build for Scalability
 
 The same way we are confident about building nanoservices, we are confident about the fact that you can make scalable software with _hitd_. Programmatically, there is no difference between reaching a local or a remote service :  all you have to do is a change in configuration.
 Moreover, for complex softwares, you can safely design your dataflow to change the location of processing.
 
+<!--- etn:
+Here, for example, we could talk about the fact that you can instantiate multiple routers to scale horizontally.
+Also, I don't got the dataflow reference to change the location of processing.
+-->
+
 ## Not So Opinionated
 
 Of course, when designing complex softwares you have to make some choices.
 Our initial choice was made to focus on simplicity, scalability.
 We also wanted customization to be easily defined by configuration and not having to change the code.
+
+<!--- etn:
+You explain your focus at the beginning : reduce the gap between specification and implementation.
+I don't get 
+-->
 
 _Hitd_ is designed for orchestration, but there is solution to do choreography, or doing flow based programming à la [noFlo](http://noflojs.org).
 
@@ -97,6 +126,10 @@ Router(endpoint , conf , function(err, router){
 ```
 
 
+<!--- etn:
+The first thing I look for, when landing on a github page, is a code snippet to grasp how I am going to be using the stuff.
+Maybe we should put a small snippet in the very beginning.
+-->
 
 
 
