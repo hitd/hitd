@@ -78,7 +78,7 @@ A big challenge when switching from a monolithic application to a distributed ap
 
 <!--- etn:
 Isn't performance more attractive than just nanoservice compliance ?
-nanoservice compliance is just a by-product of your focus on performance, right ? 
+nanoservice compliance is just a by-product of your focus on performance, right ?
 -->
 
 ## Build for Scalability
@@ -99,7 +99,7 @@ We also wanted customization to be easily defined by configuration and not havin
 
 <!--- etn:
 You explain your focus at the beginning : reduce the gap between specification and implementation.
-I don't get 
+I don't get
 -->
 
 _Hitd_ is designed for orchestration, but there is solution to do choreography, or doing flow based programming à la [noFlo](http://noflojs.org).
@@ -221,30 +221,66 @@ Hits bundle some tools, usable from developement stage to production.
 
 ####Debug
 
+usefull for log of your applicaiton, base on npm package debug by isaac.
+we made modification for on the fly change the debug level of your application
+
 ####Vantage ?
+
+a command line tools to dynamically change the topology : load and reload services, or change debug level
 
 ###Launchers
 
 ####Launcher
 
-You can configure launcher to launch at once all the microservices composing your application.
+A microservice to launch or stop other microservvice.
 
 *TODO code example*
 
 ###Relaunch
 
-You can configure relaunch to watch your dev files, and live-reload each microservice when you update the corresponding file.
+You can configure relaunch to watch your dev files, and live-reload each microservice when you update the corresponding file. It depends on launcher.
+
+Might also be usefull for deploying apps in  prod.
 
 *TODO code example*
 
 ###Available Microservices
 
 ####Front ?
+An http server translating request to the microservice with a client.
+get requsst are treanslated <httpHOST>/<path>?queryParam
+Others request are treanslated <method>/<httpHOST>/<path>?queryParam , ie POST/127.0.0.1:3000/foo?bar=baz
+
 
 ####Repository
 
+Usefull for serving static files, such as web resources.
+with front and repository, you can build a highly scalable and configurable hosting solution.
+It is based on Redis.
+
 ####Static
+
+A very simple microservice to serve static file from fs
+
+### fetch
+microservise usefull to do httprequest
 
 ###Others
 
+
+###formwebstie
+sample static website,
+please deploy with deploy static
+
 ####deploystatic
+tools to push static content inside repository
+
+###mainly
+###mongo
+
+###local
+WE need to check whether it is the same as the bin of dynamic sample
+
+###log 404
+micro service to log all
+usefull to launch in order to preven timeout
