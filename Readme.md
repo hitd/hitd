@@ -6,6 +6,33 @@ hitd is a microservices toolkit in Node.JS, similar in some points to [Seneca](h
 __The initial choices we made was using [ZeroMQ](http://zeromq.org) for communication, and using a request-responses paradigm.__
 More precisely, It is based on [Pigato](https://github.com/prdn/pigato), who does an amazing jobs handling all the low level stuff.
 
+
+##First, show me some code
+```javascript
+
+var hitd = require('hitd'),
+    endpoint = 'ipc:///tmp/feeds'+Math.random(),
+    conf = { heartbeat:30 };
+
+hitd.Router(endpoint , conf , function onRouterReady(err, router){
+  hitd.Client(endpoint , conf , function onClientReady(err, client){
+    var rules = {
+      "foo" : function(rull, req, cb){
+        cb(null, 'bar');
+      }
+    };
+
+    hitd.Handler(endpoint , conf , rules , function onHandlerReady(err ){
+      client.request('foo',function(err, res) {
+        console.log(res);
+      });
+    });
+  });
+});
+```
+
+
+
 #How is that Different ?
 Hitd means 'How Is That Different' because when presenting early version of the project to some fellow developers from all background, How is that Different from X ? was the single questions they had in mind. We will in this introduction mainly try to answer this questions.
 
@@ -85,12 +112,66 @@ In order to build a first application, you need too use the 3 main technical com
   * hitd-client :
   * hitd-handler :
 
+There is necessarily at least one instance of these three components in your application.
+The client listens for and receives requests, which it forward to the router.
+The router choose the right handler to process the request, and respond to the router.
+
+Client -> Router -> Handler
+
+#### Composition
+If a microservice needs another microservice, then the handler can act as a client, and send a request to the router.
+
+Client -> Router -> Handler / Client -> Router -> Handler
+
+The two router could be the same, or they could be different.
+
+## Router
+
 `Hitd-router` is both the most simple and most complicated components. It is currently an instance of _Pigato_ Broker. His goal is to transmit message between nodes, and deal with balancing.
 
-`Hitd-client` is the part of _hitd_ responsible for emitting request, and waiting for reply
+```javascript
+var Router = require('hitd').Router;
+
+
+
+```
+
+## Client
+
+`Hitd-client` is the part of _hitd_ responsible for emitting request, and waiting for reply.
+
+## Handler
 
 `Hitd-handler` allows to register a function when receiving a request for an associated path. The associated function can do some work, and respond to the request. Of course a function associated to an handler can instantiate a client to emit new queries. This is the way we build application based on several services.
 
+
+## Endpoint
+
+The endpoint is the address the router listen on for messages from Client and Handler.
+
+<!---
+The endpoint is an internal communication mean.
+Shouldn't it be hided from the developer ?
+Instead of giving all the three components the same address, let the router choose an endpoint, and then let the Client and Handler connect to this endpoint by asking directly the router class.
+For example, in the callback after router creation, you have a `router` object, you could just ask it for the endpoint
+-->
+
+## Configuration
+
+Available configuration options.
+
+heartbeat
+
+autostart: automatically starts the Client (type=boolean, default=false)
+onConnect: function to be called when the Client connects to the Broker
+onDisconnnect: function to be called when the Client disconnects from the Broker
+
+
+```JSON
+{
+    'heartbeat': '30'
+}
+```
 
 ```javascript
 
@@ -132,6 +213,38 @@ Maybe we should put a small snippet in the very beginning.
 -->
 
 
+##Included tooling
 
-## : Hits bundle some tools, usable from developement stage to production.
-## : Hits bundle some tools, usable from developement stage to production.## : Hits bundle some tools, usable from developement stage to production.## : Hits bundle some tools, usable from developement stage to production.## : Hits bundle some tools, usable from developement stage to production.
+Hits bundle some tools, usable from developement stage to production.
+
+###Debug
+
+####Debug
+
+####Vantage ?
+
+###Launchers
+
+####Launcher
+
+You can configure launcher to launch at once all the microservices composing your application.
+
+*TODO code example*
+
+###Relaunch
+
+You can configure relaunch to watch your dev files, and live-reload each microservice when you update the corresponding file.
+
+*TODO code example*
+
+###Available Microservices
+
+####Front ?
+
+####Repository
+
+####Static
+
+###Others
+
+####deploystatic
