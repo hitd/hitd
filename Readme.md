@@ -6,7 +6,7 @@ hitd is a microservices toolkit in Node.JS, similar in some points to [Seneca](h
 __The initial choices we made was using [ZeroMQ](http://zeromq.org) for communication, and using a request-responses paradigm.__
 More precisely, It is based on [Pigato](https://github.com/prdn/pigato), who does an amazing jobs handling all the low level stuff.
 
-
+<!---
 ##First, show me some code
 ```javascript
 
@@ -30,7 +30,7 @@ hitd.Router(endpoint , conf , function onRouterReady(err, router){
   });
 });
 ```
-
+-->
 
 
 #How is that Different ?
@@ -50,7 +50,7 @@ For the first step of the implementation, It looked a lot at others microservice
 With time, we added layers in order to focus less on developers and more on product manager. The final goal, but we are still very far from it, would be to transform specification to code.
 For example, We are currently working on a graph based interface for building  microservices architecture.
 
->!--- etn:
+<!--- etn:
 In my opinion, it is confusing to retrace the history to justify your approach.
 The first sentence is good.
 But I fail to see the verticallity you mention.
@@ -106,55 +106,120 @@ _Hitd_ is designed for orchestration, but there is solution to do choreography, 
 
 # Usage
 
-You can use _hitd_ the same way as others node.js micro-service library. In fact, as already mentioned, _hitd_ is based on _Pigato_, and can be used in a very similar way.
-In order to build a first application, you need too use the 3 main technical components :
-  * hitd-router :
-  * hitd-client :
-  * hitd-handler :
+<!---
+You can use _hitd_ the same way as other node.js micro-service library.
+_hitd_ is based on _Pigato_, and can be used in a very similar way.
+-->
+In order to build a first application, you will use the 3 main technical components : Client `hitd-client`, Router `hitd-router` and Handler `hitd-handler`
 
-There is necessarily at least one instance of these three components in your application.
-The client listens for and receives requests, which it forward to the router.
-The router choose the right handler to process the request, and respond to the router.
+The client connects to the router to emits requests.
+The clients represent the interface between your users and your application.
+The handler registers rules to respond to requests from the clients.
+These rules contains your business logic.
 
-Client -> Router -> Handler
+Both, the clients and the handlers register on the router, which is the communication mean between the two.
+When a client emits a request, the router chooses the right handler and forward the request to it.
+Once the handler processed the request, the response is sent back to the router, then to the client.
+
+Request : Client → Router → Handler
+Response : Client ← Router ← Handler
 
 #### Composition
-If a microservice needs another microservice, then the handler can act as a client, and send a request to the router.
+If a microservice needs another microservice, then the Handler can act as a Client.
 
-Client -> Router -> Handler / Client -> Router -> Handler
+Request : Client → Router → ( Handler + Client ) → Router → Handler
+Response : Client ← Router ← ( Handler + Client ) ← Router ← Handler
 
-The two router could be the same, or they could be different.
-
-## Router
-
-`Hitd-router` is both the most simple and most complicated components. It is currently an instance of _Pigato_ Broker. His goal is to transmit message between nodes, and deal with balancing.
-
-```javascript
-var Router = require('hitd').Router;
-
-
-
-```
+The two routers could be the same, or they could be different.
 
 ## Client
 
+A client is responsible for emitting requests.
+It connects to a router through an endpoint that is specified at instantiation.
+
+For each `request`, the client specifies the `path` to send the request to, and a callback to wait for the result.
+
+<!---
 `Hitd-client` is the part of _hitd_ responsible for emitting request, and waiting for reply.
+-->
+
+```javascript
+var Client = require('hitd').Client,
+    endpoint = 'ipc:///tmp/my_test_endpoint',
+    conf = { heartbeat:30 };
+
+function onClientReady(err, client) {
+  client.request('foo', function(err, res) {
+    console.log(res);
+  });
+}
+
+var client = Client(endpoint, conf, onClientReady);
+```
+
+## Router
+
+
+The router receives requests from clients, and forwards them to the appropriate handlers. Because it is a single point between clients and handlers, it deals with balancing the load of requests between redundant handlers.
+
+The router is based on the _Pigato_ broker.
+
+<!---
+`Hitd-router` is both the most simple and most complicated components. It is currently an instance of _Pigato_ Broker. His goal is to transmit message between nodes, and deal with balancing.
+-->
+
+```javascript
+var Router = require('hitd').Router,
+    endpoint = 'ipc:///tmp/my_test_endpoint',
+    conf = { heartbeat:30 };
+
+function onRouterRead() {
+  // Nothing to do.
+  // The router waits for requests from clients.
+}
+
+var router = Router(endpoint, conf, onRouterReady);
+
+```
 
 ## Handler
 
-`Hitd-handler` allows to register a function when receiving a request for an associated path. The associated function can do some work, and respond to the request. Of course a function associated to an handler can instantiate a client to emit new queries. This is the way we build application based on several services.
+A handler registers rules to respond to requests.
 
-
-## Endpoint
-
-The endpoint is the address the router listen on for messages from Client and Handler.
+A rule is defined by a `path`, and a `worker` function to process and respond to the request.
+The `worker` function expects three arguments, the path that triggered the request, the request, and a callback to respond to the request.
+A `worker` function can use a client to emit a query before responding.
 
 <!---
-The endpoint is an internal communication mean.
-Shouldn't it be hided from the developer ?
-Instead of giving all the three components the same address, let the router choose an endpoint, and then let the Client and Handler connect to this endpoint by asking directly the router class.
-For example, in the callback after router creation, you have a `router` object, you could just ask it for the endpoint
+`Hitd-handler` allows to register a function when receiving a request for an associated path. The associated function can do some work, and respond to the request. Of course a function associated to an handler can instantiate a client to emit new queries. This is the way we build application based on several services.
 -->
+
+```javascript
+var Handler = require('hitd').Handler,
+    endpoint = 'ipc:///tmp/my_test_endpoint',
+    conf = { heartbeat:30 },
+    rules = {
+      'foo' : function worker(rulePath, req, cb){
+        cb(null, 'bar');
+      }
+    };
+
+function onHandlerReady(err){
+  // Nothing to do.
+  // The handler waits for requests from the router.
+}
+
+var handler = Handler(endpoint, conf, rules, onHandlerReady);
+```
+
+
+
+
+<!---
+## Endpoint
+
+The endpoint is the address the Router listen on for messages from Clients.
+Clients and Handlers connect to this address to communicate with the Router.
 
 ## Configuration
 
@@ -172,7 +237,56 @@ onDisconnnect: function to be called when the Client disconnects from the Broker
     'heartbeat': '30'
 }
 ```
+-->
 
+---
+
+
+```javascript
+
+var Handler = require('hitd').Handler,
+    Client = require('hitd').Client,
+    Router = require('hitd').Router,
+    endpoint = 'ipc:///tmp/feeds'+Math.random();
+
+// Your business here
+
+var conf = {
+      heartbeat : 30
+    },
+    rules = {
+      'foo' : fooWorker
+    };
+
+function fooWorker(rulePath, req, cb){
+  cb(null, 'bar');
+}
+
+function fooRequest(client) {
+  client.request('foo', function(err, res) {
+    console.log(res);
+  });
+}
+
+// Instantiation of your architecture :
+
+function onRouterReady() {
+  var handler = Handler(endpoint, conf, rules, onHandlerReady);
+}
+
+function onHandlerReady(err){
+  var client = Client(endpoint, conf, onClientReady);
+}
+
+function onClientReady(err, client) {
+  fooRequest(client);
+}
+
+var router = Router(endpoint, conf, onRouterReady);
+
+```
+
+<!---
 ```javascript
 
 var Handler = require('..').Handler;
@@ -205,82 +319,105 @@ Router(endpoint , conf , function(err, router){
 
 
 ```
-
-
-<!--- etn:
-The first thing I look for, when landing on a github page, is a code snippet to grasp how I am going to be using the stuff.
-Maybe we should put a small snippet in the very beginning.
 -->
 
 
-##Included tooling
+## Tooling
 
-Hits bundle some tools, usable from developement stage to production.
+The strength of _hitd_ is the tooling surrounding its simple core, helping you develop, maintain and run your application from development stage to production.
 
-###Debug
+### Exploitation
 
-####Debug
+#### hitd-launcher
 
-usefull for log of your applicaiton, base on npm package debug by isaac.
-we made modification for on the fly change the debug level of your application
-
-####Vantage ?
-
-a command line tools to dynamically change the topology : load and reload services, or change debug level
-
-###Launchers
-
-####Launcher
-
-A microservice to launch or stop other microservvice.
+`hitd-launcher` manages the execution of other microservices.
+It can start, restart and stop instances.
 
 *TODO code example*
 
-###Relaunch
+#### hitd-relaunch
 
-You can configure relaunch to watch your dev files, and live-reload each microservice when you update the corresponding file. It depends on launcher.
+`hitd-relaunch` can watch your sources, and live-reload each microservice when you update it.
+It depends on launcher.
 
 Might also be usefull for deploying apps in  prod.
 
 *TODO code example*
 
-###Available Microservices
+#### hitd-vantage
 
-####Front ?
-An http server translating request to the microservice with a client.
-get requsst are treanslated <httpHOST>/<path>?queryParam
-Others request are treanslated <method>/<httpHOST>/<path>?queryParam , ie POST/127.0.0.1:3000/foo?bar=baz
+<!---
+You need to rename this, the name vantage is already taken :p
+-->
+`hitd-vantage` lets you control your application on the fly.
+It allows to load and reload services, and to change the debug level.
+<!---
+TODO : add a list command, to list currently running services, and display their package.json if any.
+-->
+
+*TODO usage example*
+
+#### hitd-debug
+
+`hitd-debug` allows each parts of your application to log its activity.
+*TODO code and usage example*
+
+### Available Microservices
+
+#### hitd-front
+
+`hitd-front` is an HTTP server with a `hitd-client` forwarding requests to a router.
+
+GET requests are forwarded to `<httpHOST>/<path>?queryParam`.
+Others request are forwarded to `<method>/<httpHOST>/<path>?queryParam`.
+For example : `POST/127.0.0.1:3000/foo?bar=baz`
+
+*TODO code example*
+
+#### hitd-repository
+
+`hitd-repository` is a `hitd-handler` to serve static files, such as web resources, from a Redis base.
+With `hitd-front` and `hitd-repository`, you can build a highly scalable and configurable hosting solution.
+
+*TODO code example*
+
+#### hitd-static
+
+`hitd-static` is a `hitd-handler` to serve static files directly from the filesystem.
+
+*TODO code example*
+
+### hitd-fetch
+
+`hitd-fetch` is a `hitd-handler` to send HTTP request to external HTTP servers.
+
+*TODO code example*
+
+### hitd-log404
+
+`hitd-log404` is a `hitd-handler` that registers a default path to catch all requests that would not be responded to otherwise.
+It logs the requests, and returns a 404 code to notify the unfulfillment of the request.
+
+*TODO code example*
 
 
-####Repository
+<!---
+### Samples
 
-Usefull for serving static files, such as web resources.
-with front and repository, you can build a highly scalable and configurable hosting solution.
-It is based on Redis.
+#### formwebsite
 
-####Static
-
-A very simple microservice to serve static file from fs
-
-### fetch
-microservise usefull to do httprequest
-
-###Others
-
-
-###formwebstie
 sample static website,
 please deploy with deploy static
 
-####deploystatic
+#### deploystatic
+
 tools to push static content inside repository
 
-###mainly
-###mongo
+#### mainly
 
-###local
-WE need to check whether it is the same as the bin of dynamic sample
+#### mongo
 
-###log 404
-micro service to log all
-usefull to launch in order to preven timeout
+#### local
+
+We need to check whether it is the same as the bin of dynamic sample
+-->
