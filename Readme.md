@@ -1,10 +1,13 @@
-#hitd
-##A devOps microservices toolkit in Node.js
+# hitd
+## A devOps microservices toolkit in Node.js
 
-hitd is a microservices toolkit in Node.JS, similar in some points to [Seneca](https://github.com/rjrodger/seneca) and/or [Micromono](https://github.com/lsm/micromono) , [Spinal](https://github.com/jitta/spinal).
+hitd is a large spectrum microservices toolkit in Node.JS.
+It is similar in some points to [Seneca](https://github.com/rjrodger/seneca) and/or [Micromono](https://github.com/lsm/micromono) , [Spinal](https://github.com/jitta/spinal), but offer much more.
+You can think of it as [Impress](https://github.com/tshemsedinov/impress) for microservices.
 
-__The initial choices we made was using [ZeroMQ](http://zeromq.org) for communication, and using a request-responses paradigm.__
+Regarding the low level stuff, __The initial choices we made was using [ZeroMQ](http://zeromq.org) for communication, and using a request-responses paradigm.__
 More precisely, It is based on [Pigato](https://github.com/prdn/pigato), who does an amazing jobs handling all the low level stuff.
+
 
 <!---
 ##First, show me some code
@@ -33,8 +36,8 @@ hitd.Router(endpoint , conf , function onRouterReady(err, router){
 -->
 
 
-#How is that Different ?
-Hitd means 'How Is That Different' because when presenting early version of the project to some fellow developers from all background, How is that Different from X ? was the single questions they had in mind. We will in this introduction mainly try to answer this questions.
+# How is that Different ?
+Hitd means 'How Is That Different' because when presenting early version of the project to some fellow developers from all background, _How is that Different from X ?_ was the single question they had in mind. We will in this introduction mainly try to answer this question, and will focus on the 5 following points :
 
  - Vertically Oriented
  - Great Tooling
@@ -43,68 +46,51 @@ Hitd means 'How Is That Different' because when presenting early version of the 
  - Not so opinionated
 
 
-##Vertically Oriented
+## Vertically Oriented
 
 The main goal of _hitd_ is to reduce the gap between specification and implementation.
-For the first step of the implementation, It looked a lot at others microservices solutions, focusing on the architecture and communication between nodes.
-With time, we added layers in order to focus less on developers and more on product manager. The final goal, but we are still very far from it, would be to transform specification to code.
+If you look at the low level stuff, it is similar to others microservices solutions, focusing on the architecture and communication between nodes.
+But truth is, hitd adds more layers in order to focus less on developers and more on product manager. The final goal, but we are still very far from it, would be to transform specification to code.
 For example, We are currently working on a graph based interface for building  microservices architecture.
 
-<!--- etn:
-In my opinion, it is confusing to retrace the history to justify your approach.
-The first sentence is good.
-But I fail to see the verticallity you mention.
-Is it from hardware to software, or from developers to project manager ?
--->
+Because we provide basic microservices, you can deploy some basic applications without developing any microservice. And while your organization will create more microservice, the need to develop news one will be reduced.
 
-##Great Tooling
-Because we add abstraction layers doesn't mean we forget developers. We know that you sometimes have no better choice than to write code. Code reusability and sexy graphical interface are not a golden bullet. We want you to be comfortable writing and running some code running on top of hitd.
 
-<!--- etn:
-If I understood correctly, you could say that hitd allows to modify the architecture at different layer.
--->
+## Great Tooling
+Because we add abstraction layers doesn't mean we forget developers. We know that you sometimes have no better choice than to write code. Code re-usability and sexy graphical interface are not a golden bullet. We want you to be comfortable writing and running some code running on top of hitd.
 
-One of the tools we love the most, is `hitd-reload`. It allows you to dynamically live reload microservices while the code is changing. Awesome for delivery, but mainly for developments, where you will gain a lot of time.
+One of the tools we love the most, is `hitd-reload`. It allows you to dynamically live reload microservices while the code is changing. Great for delivery, but awesome for developments, where you will gain a lot of time.
 
-We also developed some tools to dynamically install and load a microservice on a node.
+We also developed some tools, _ie_ hitd-launch to dynamically install and load a microservice on a node.
+All of this is described below.
 
-<!--- etn:
-We could maybe be more exhaustive here, and point to more in-depth description below.
--->
 
 ## Nanoservice Compliant
 
 A big challenge when switching from a monolithic application to a distributed application is to defined the size of the slices of application once cutted. We don't provide a full answer to that question, but you can relax, you won't have a huge performance overhead because of too many very small microservices, aka nanoservices.
 
-<!--- etn:
-Isn't performance more attractive than just nanoservice compliance ?
-nanoservice compliance is just a by-product of your focus on performance, right ?
--->
 
 ## Build for Scalability
 
 The same way we are confident about building nanoservices, we are confident about the fact that you can make scalable software with _hitd_. Programmatically, there is no difference between reaching a local or a remote service :  all you have to do is a change in configuration.
-Moreover, for complex softwares, you can safely design your dataflow to change the location of processing.
 
-<!--- etn:
-Here, for example, we could talk about the fact that you can instantiate multiple routers to scale horizontally.
-Also, I don't got the dataflow reference to change the location of processing.
--->
+When a microservice is a become a contention point, you can instantiate another instance of it on the same router. Then the load will spread over the different instances.
+
+For complex softwares, you can create complexe architecture to change the location of processing.
+
 
 ## Not So Opinionated
 
 Of course, when designing complex softwares you have to make some choices.
-Our initial choice was made to focus on simplicity, scalability.
+Our initial choice was made to focus on simplicity and scalability.
 We also wanted customization to be easily defined by configuration and not having to change the code.
-
-<!--- etn:
-You explain your focus at the beginning : reduce the gap between specification and implementation.
-I don't get
--->
+Moreover, because we think that each project is different, you should have the choice to architect components the way you want. Of course, one of the goal of the micro-service approach is to have me reusable bricks between projects. It is totally up to you wether you want to instantiate the microservices for all of your project, or if you prefer a global instantiation. And of course, you can choose it for each service.
 
 _Hitd_ is designed for orchestration, but there is solution to do choreography, or doing flow based programming à la [noFlo](http://noflojs.org).
 
 # Usage
+## Minimal Application
+
 
 <!---
 You can use _hitd_ the same way as other node.js micro-service library.
@@ -121,14 +107,16 @@ Both, the clients and the handlers register on the router, which is the communic
 When a client emits a request, the router chooses the right handler and forward the request to it.
 Once the handler processed the request, the response is sent back to the router, then to the client.
 
-Request : Client → Router → Handler
-Response : Client ← Router ← Handler
+Request : Client -> Router -> Handler
+
+Response : Client <- Router <- Handler
 
 #### Composition
 If a microservice needs another microservice, then the Handler can act as a Client.
 
-Request : Client → Router → ( Handler + Client ) → Router → Handler
-Response : Client ← Router ← ( Handler + Client ) ← Router ← Handler
+Request : Client -> Router <- ( Handler + Client ) -> Router -> Handler
+
+Response : Client -> Router <- ( Handler + Client ) <- Router <- Handler
 
 The two routers could be the same, or they could be different.
 
@@ -212,6 +200,11 @@ function onHandlerReady(err){
 var handler = Handler(endpoint, conf, rules, onHandlerReady);
 ```
 
+## laucnh existing microservice
+
+### With yml
+
+### Manually
 
 
 
