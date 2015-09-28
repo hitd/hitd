@@ -1,4 +1,5 @@
 # hitd
+
 ## A devOps microservices toolkit in Node.js
 
 hitd is a large spectrum microservices toolkit in Node.JS.
@@ -7,33 +8,6 @@ You can think of it as [Impress](https://github.com/tshemsedinov/impress) for mi
 
 Regarding the low level stuff, __communication is made by [ZeroMQ](http://zeromq.org) for communication, and we use a request-responses paradigm.__
 More precisely, It is based on [Pigato](https://github.com/prdn/pigato), who does an amazing jobs handling all the low level stuff.
-
-
-<!---
-##First, show me some code
-```javascript
-
-var hitd = require('hitd'),
-    endpoint = 'ipc:///tmp/feeds'+Math.random(),
-    conf = { heartbeat:30 };
-
-hitd.Router(endpoint , conf , function onRouterReady(err, router){
-  hitd.Client(endpoint , conf , function onClientReady(err, client){
-    var rules = {
-      "foo" : function(rull, req, cb){
-        cb(null, 'bar');
-      }
-    };
-
-    hitd.Handler(endpoint , conf , rules , function onHandlerReady(err ){
-      client.request('foo',function(err, res) {
-        console.log(res);
-      });
-    });
-  });
-});
-```
--->
 
 
 # How is that Different ?
@@ -45,7 +19,6 @@ Hitd means 'How Is That Different' because when presenting early version of the 
  - Build for Scalability
  - Not so opinionated
 
-
 ## Vertically Oriented
 
 The main goal of _hitd_ is to reduce the gap between specification and implementation.
@@ -54,7 +27,6 @@ But truth is, _hitd_ adds more layers in order to be usable directly by product 
 Following this dream, we are also currently working on a graph based interface for building microservices architecture.
 
 Because we provide basic microservices, you can deploy some basic applications without developing any microservice. And while your organization will create more microservice, the need to develop news one will be reduced.
-
 
 ## Great Tooling
 
@@ -75,15 +47,15 @@ A big challenge when switching from a monolithic application to a distributed ap
 
 The same way we are confident about building nanoservices, we are confident about the fact that you can make scalable software with _hitd_. Programmatically, there is no difference between reaching a local or a remote service :  all you have to do is a change in configuration.
 
-When a microservice is become a contention point, you can instantiate another instance of it on the same router. Then the load will spread over the different instances.
+When a microservice become a contention point, you can instantiate another instance of it on the same router. Then the load will spread over the different instances.
 
-For complex softwares, you can create complexe architecture to change the location of processing.
+For complex softwares, you can create complex architecture to change the location of processing.
 
 
 ## Not So Opinionated
 
 Of course, when designing complex softwares you have to make some choices.
-From Start, we decided to focus on simplicity and scalability.
+From start, we decided to focus on simplicity and scalability.
 We also wanted customization to be easily defined by configuration and not having to change the code.
 Moreover, because we think that each project is different, you should have the choice to architect components the way you want. Of course, one of the goal of the micro-service approach is to have more reusable bricks between projects. It is totally up to you whether you want to instantiate the microservices for all of your project, or if you prefer a global instantiation. And of course, you can choose it for each service.
 
@@ -91,13 +63,13 @@ _Hitd_ is designed for orchestration, but there is solution to do choreography, 
 
 # Usage
 
-_Hitd_ can be seen as an Application Server or a Microservice Toolkit,depending of the way you use it. The global vision would be to say that it is a Distributed Microservice Based Application Server framework.
+_Hitd_ can be seen as an Application Server or a Microservice Toolkit,depending of the way you use it. The global vision would be to say that it is a Distributed microservice Based Application Server framework.
 
 ## Application server
 Seeing _Hitd_ as an application server, mean that you will run a server, says the _hitd_ command, and that you will be able to launch application/microservices in it.
 This is possible.
 In ordet to launch a microservice on top on an application server, to solution :
- - use hitd-launcher, a microservice instatied automatically in the application server and allowing to launch dynamically a Microservice
+ - use hitd-launcher, a microservice automatically instantiated in the application server and allowing to launch dynamically a microservice
  - use hitd-vantage, a terminal based tools allowing you to interact with the application server
  - use a YML file, describing the topology of microservices to run in this process.
 
@@ -107,8 +79,11 @@ _Hitd_ is based on pigato, and exposes the same concept.
 For example, there is 3 main technical components : Client `hitd-client`, Router `hitd-router` and Handler `hitd-handler`
 
 The client connects to the router to emits requests.
+
 The clients represent the interface between your users and your application.
+
 The handler registers rules to respond to requests from the clients.
+
 These rules contains your business logic.
 
 Both, the clients and the handlers register on the router, which is the communication mean between the two.
@@ -120,7 +95,7 @@ Request : Client -> Router -> Handler
 Response : Client <- Router <- Handler
 
 #### Composition
-If a microservice needs another microservice, then the Handler can act as a Client.
+If a microservice needs another microservice, then the Handler can instantiate and act as a Client.
 
 Request : Client -> Router <- ( Handler + Client ) -> Router -> Handler
 
@@ -129,10 +104,9 @@ Response : Client -> Router <- ( Handler + Client ) <- Router <- Handler
 The two routers could be the same, or they could be different.
 
 
-
 ### Give me some Code
 
-I know, if like me you like more code than long speech, you are right know very frustrated.
+I know, if prefere code than long speech, you are right know very frustrated.
 The wait is over, you'll find below code samples for coding components.
 
 ## Client
@@ -204,12 +178,57 @@ function onHandlerReady(err){
 var handler = Handler(endpoint, conf, rules, onHandlerReady);
 ```
 
-## lauch existing microservice
+## Launch existing microservice
 
-### With yml
+In order to launch microservices, you can do that in different manners, automatically or manually.
+### With YML
+
+As already mentioned, you can think of `hitd` as an application server.
+An application server not running any application is useless, so you need an easy way to start microservices. This can be done easily, but let's start with a sample.
+
+```YML
+---
+Bindings :
+
+  - name :  front
+    endpoint:  ipc:///tmp/httpfront
+    nodes :
+      - name : hitd-log404
+        hitd-log404 :
+          host : '127.0.0.1:3000'
+
+      - name : hitd-static
+        static_prefix : 'http/127.0.0.1:3000/mywebsite'
+        static_cwd : '~/mywebsite'
+
+    clients :
+      - name : hitd-front
+        port : 3000
+
+```
+Thanks to this YML, we will :
+-  Launch a Router named 'front' and listening on endpoint  'ipc:///tmp/httpfront'.
+-  Launch two microservice handlers, 'hitd-log404' and 'hitd-static', with specific parameters.
+-  Launch the hitd-front client, which is is the service translating http request to hitd Request.
+- Globally, this means that this application will we a webserver, service files from folder '~/mywebsite' under http://127.0.0.1:3000/mywebsite and will answer with a 404 response if we try to reach another folder or use another HTTP Host Header.
+
+Based on this sample, you can now create more complex application.
+Because Bindings is an arrays, you can add as many `Router` as you want.
+`nodes` and `clients` are also arrays, so you can add as many of them as you want.
+
+Regarding configuration, when launching a node, the configuration provided will be the configuration given to the router more the specific configuration.
+If we have severals routers, you can also add a Defaults configuration which will be given to all.
+This is convenient for example for providing the same Pigato heartbeat parameters to all components.
+
+Please keep in mind that currently all microservice will be launched in the same process.
+If you want to launch a distributed application, you will need severals YMLs, and to launch the hitd server by yourself, or submit a PR. ;)
+
 
 ### Manually
 
+If you launch an hitd-server without YML files, it won't launch applicative microservices.
+Still, the hitd-launch microservice, will be launched, and you willbe able to use a cleitn sendind request to it so it launch a specific services.
+`hitd-vantage`  provide an easy way to launch a service without coding the launcher. With this REPL too, you will be able to launch, start or debug a microservice. 
 
 
 <!---
