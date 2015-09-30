@@ -10,7 +10,64 @@ Regarding the low level stuff, __communication is made by [ZeroMQ](http://zeromq
 More precisely, It is based on [Pigato](https://github.com/prdn/pigato), who does an amazing jobs handling all the low level stuff.
 
 
-# How is that Different ?
+## Install
+
+` npm i -g hitd`
+
+## Tutorial
+
+### Start
+```
+./hitd
+
+> hitd@0.0.1 start /home/maxired/hitd-gitrepository-1
+> node bin/index.js
+
+                                                             dddddddd
+hhhhhhh              iiii          tttt                     d::::::d
+h:::::h             i::::i      ttt:::t                     d::::::d
+h:::::h              iiii       t:::::t                     d::::::d
+h:::::h                          t:::::t                     d:::::d
+h::::h hhhhh       iiiiiiittttttt:::::ttttttt        ddddddddd:::::d
+h::::hh:::::hhh    i:::::it:::::::::::::::::t      dd::::::::::::::d
+h::::::::::::::hh   i::::it:::::::::::::::::t     d::::::::::::::::d
+h:::::::hhh::::::h  i::::itttttt:::::::tttttt    d:::::::ddddd:::::d
+h::::::h   h::::::h i::::i      t:::::t          d::::::d    d:::::d
+h:::::h     h:::::h i::::i      t:::::t          d:::::d     d:::::d
+h:::::h     h:::::h i::::i      t:::::t          d:::::d     d:::::d
+h:::::h     h:::::h i::::i      t:::::t    ttttttd:::::d     d:::::d
+h:::::h     h:::::hi::::::i     t::::::tttt:::::td::::::ddddd::::::dd
+h:::::h     h:::::hi::::::i     tt::::::::::::::t d:::::::::::::::::d
+h:::::h     h:::::hi::::::i       tt:::::::::::tt  d:::::::::ddd::::d
+hhhhhhh     hhhhhhhiiiiiiii         ttttttttttt     ddddddddd   ddddd
+
+Listening on ipc:///tmp/hitd-25617
+
+hitd~
+```
+As you can see, when you launch `hitd`, a command line interface is launched, from there you can have help and launch service.
+
+#### start a service
+For example you can start the http-front handler
+
+`start hitd-front`
+
+Of course, you might want to chnage the configuraiton or endpoint before launching serviceyou can do that with the helper methode getendpoint/setendpoint and getconf/setconf.
+
+you can know a webserver running on port 3000  of you host.
+but curl http:/127.0.0.1:3000 will return a timeout. We indeed launched a webserver, but no router or handler.
+
+`start hitd-router`
+
+`start hitd-log404`
+
+you can also develop your own microservice and launch it.
+ -> see devlop your service
+
+
+# Going deeper
+
+# How Is That Different ?
 Hitd means 'How Is That Different' because when presenting early version of the project to some fellow developers from all background, _How is that Different from X ?_ was the single question they had in mind. We will in this introduction mainly try to answer this question, and will focus on the 5 following points :
 
  - Vertically Oriented
@@ -104,10 +161,13 @@ Response : Client -> Router <- ( Handler + Client ) <- Router <- Handler
 The two routers could be the same, or they could be different.
 
 
+
+
+
 ### Give me some Code
 
-I know, if prefere code than long speech, you are right know very frustrated.
-The wait is over, you'll find below code samples for coding components.
+
+
 
 ## Client
 
@@ -181,6 +241,14 @@ var handler = Handler(endpoint, conf, rules, onHandlerReady);
 ## Launch existing microservice
 
 In order to launch microservices, you can do that in different manners, automatically or manually.
+
+
+### Manually
+
+If you launch an hitd-server without YML files, it won't launch applicative microservices.
+Still, the hitd-launch microservice, will be launched, and you willbe able to use a cleitn sendind request to it so it launch a specific services.
+`hitd-vantage`  provide an easy way to launch a service without coding the launcher. With this REPL too, you will be able to launch, start or debug a microservice.
+
 ### With YML
 
 As already mentioned, you can think of `hitd` as an application server.
@@ -224,11 +292,6 @@ Please keep in mind that currently all microservice will be launched in the same
 If you want to launch a distributed application, you will need severals YMLs, and to launch the hitd server by yourself, or submit a PR. ;)
 
 
-### Manually
-
-If you launch an hitd-server without YML files, it won't launch applicative microservices.
-Still, the hitd-launch microservice, will be launched, and you willbe able to use a cleitn sendind request to it so it launch a specific services.
-`hitd-vantage`  provide an easy way to launch a service without coding the launcher. With this REPL too, you will be able to launch, start or debug a microservice. 
 
 
 <!---
