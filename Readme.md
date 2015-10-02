@@ -51,19 +51,47 @@ As you can see, when you run `hitd`, a REPL is launched, and from this prompt yo
 
 #### start a service
 
-For example you can start the http-front handler
+Now that the REPL is launched, you probably want to launch a first service, in order to create your first hitd application.
+The following tutorial will guide you in the creation of a web server serving static files.
+
+The first thing that you want launch is probably the hitd-front service. It creates a web-server and translate HTTP request in hitd request
 
 `start hitd-front`
 
-Of course, you might want to change the configuration or endpoint before spawning a service. You can do that with the helper method getendpoint/setendpoint and getconf/setconf.
+Using this service, you just spawned a web server running on port 3000 of your host. Yet, a `curl http:/127.0.0.1:3000/foo` will return a timeout. that is because we didn't create any service to answer to hitd requests.
 
-Using thi service, you have spawned a webserver running on port 3000 of your host. Yet, a `curl http:/127.0.0.1:3000` will return a timeout. We indeed launched a webserver, but no router or handler.
-
-`start hitd-router`
+At this point, it would be clever to launch hitd-log404.
 
 `start hitd-log404`
 
-Of course, you can also create your own microservice and launch it. -> see devlop your service
+Once the hitd-log404 has been launch, the command  `curl http:/127.0.0.1:3000/foo` now return an 404 error with the body 'PAGE NOT FOUND'.
+
+The bevavior of the hitd-log404 is rather simple. If no others service can handle an HTTP request translated in hitd, then it will answer with the status code 404 and the body 'PAGE NOT FOUND'. Then the `hitd-front` service will transmit the response to the http client, here `curl`.
+
+Because you want more than an wwebserver responding 404 errors, we will launch another service.
+There is severals ways in hitd to serve static files, but the simplest is `hitd-front`. It is usefull to serve static files from a folder in dev, in production on one node, or if your have a distributed file system or something similar.
+
+`start hitd-static`
+
+Once hitd-static is launch , `curl http://127.0.0.1:3000/index.js` shoudl now return the content of the hitd-static/lib/index.js file.  That is because the default directroy served is `hitd-static/lib`.
+You probably want to serve something else that the library allowing to do so ( Did someone just say inception ? ), we need to tell the hitd-static service wich folder to serve. first, lets stop the service.
+
+`stop hitd-static`
+
+In order to go further, we need to understand how works configuration.
+Using `getconf`, you can see the configuration which will be passed to services launch at this point.
+At this point, `getconf` should return `{"heartbeat":30}`, which is the default Configuration that we choose. heartbeat is a pigato parameter defining rate a which pigato nodes send themself hearbeat messages.
+
+the parameter to change the folder served by hitd-static is 'static_cwd'. to change it, you can use the `setconf` command.
+
+`setconf static_cwd <foldertoserve>` , for example
+`setconf stati_cwd ~/mywebsite`
+
+Now that you defined the folder to serve, lets relaunch the `hitd-static` service.
+
+`start hitd-static`
+
+You should now be able to access content from the folder you defined.
 
 Going deeper
 ============
