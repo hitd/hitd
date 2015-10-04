@@ -110,7 +110,7 @@ The main goal of *hitd* is to reduce the gap between specification and implement
 
 The final goal (but we are still very far from it), would be to transform specification to code. Following this dream, we are also currently working on a graph based interface for building microservices architecture.
 
-We provide some basic microservices, enough so you can deploy some basic applications without developing any new one. For any application with a non trivial business logic, you'll of course need to create at some point [your own microservices](#Creating-my-own-microservice). Yet, while you, or your organization, will create more and more microservices, the need to develop new ones will be decreased as a good microservice provides more re-use than monolothic code.
+We provide some basic microservices, enough so you can deploy some basic applications without developing any new one. For any application with a non trivial business logic, you'll of course need to create at some point [your own microservices](#creating-my-own-microservice). Yet, while you, or your organization, will create more and more microservices, the need to develop new ones will be decreased as a good microservice provides more re-use than monolothic code.
 
 Great Tooling
 -------------
