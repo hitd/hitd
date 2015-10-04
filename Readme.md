@@ -19,7 +19,7 @@ Tutorial
 ### Start
 
 ```
-./hitd
+$> ./hitd
 
 > hitd@0.0.1 start /home/maxired/hitd-gitrepository-1
 > node bin/index.js
@@ -51,41 +51,37 @@ As you can see, when you run `hitd`, a REPL is launched, and from this prompt yo
 
 #### start a service
 
-Now that the REPL is launched, you probably want to launch a first service, in order to create your first hitd application.
-The following tutorial will guide you in the creation of a web server serving static files.
+Now that the REPL is launched, you'll probably want to launch a first service, in order to create your first *hitd* application. The following tutorial will guide you in the creation of a web server serving static files.
 
-The first thing that you want launch is probably the hitd-front service. It creates a web-server and translate HTTP request in hitd request
+The first thing that you want launch is probably the hitd-front service. It creates a web-server and translate HTTP request in *hitd* request
 
 `start hitd-front`
 
-Using this service, you just spawned a web server running on port 3000 of your host. Yet, a `curl http:/127.0.0.1:3000/foo` will return a timeout. that is because we didn't create any service to answer to hitd requests.
+Using this service, you just spawned a web server running on port 3000 of your host. Yet, a `curl http://127.0.0.1:3000/foo` will return a timeout. that is because we didn't create any service to answer to hitd requests.
 
 At this point, it would be clever to launch hitd-log404.
 
 `start hitd-log404`
 
-Once the hitd-log404 has been launch, the command  `curl http:/127.0.0.1:3000/foo` now return an 404 error with the body 'PAGE NOT FOUND'.
+Once the hitd-log404 has been launch, the command `curl http://127.0.0.1:3000/foo` now returns a 404 error with the body 'PAGE NOT FOUND'.
 
-The bevavior of the hitd-log404 is rather simple. If no others service can handle an HTTP request translated in hitd, then it will answer with the status code 404 and the body 'PAGE NOT FOUND'. Then the `hitd-front` service will transmit the response to the http client, here `curl`.
+The behavior of the `hitd-log404` is rather simple. If no others service can handle an HTTP request translated in *Hitd*, then it will answer with the status code 404 and the body 'PAGE NOT FOUND'. Then the `hitd-front` service will transmit the response to the http client, here `curl`.
 
-Because you want more than an wwebserver responding 404 errors, we will launch another service.
-There is severals ways in hitd to serve static files, but the simplest is `hitd-front`. It is usefull to serve static files from a folder in dev, in production on one node, or if your have a distributed file system or something similar.
+Because you want more than an webserver responding 404 errors, we will launch another service. There are severals ways in *hitd* to serve static files, but the simplest is `hitd-front`. It is useful to serve static files from a folder in dev, in production on one node, or if your have a distributed file system or something similar.
 
 `start hitd-static`
 
-Once hitd-static is launch , `curl http://127.0.0.1:3000/index.js` shoudl now return the content of the hitd-static/lib/index.js file.  That is because the default directroy served is `hitd-static/lib`.
-You probably want to serve something else that the library allowing to do so ( Did someone just say inception ? ), we need to tell the hitd-static service wich folder to serve. first, lets stop the service.
+Once hitd-static is launch , `curl http://127.0.0.1:3000/index.js` should now return the content of the hitd-static/lib/index.js file. That is because the default directory served is `hitd-static/lib`. You probably want to serve something else that the library allowing to do so ( did someone just say inception ? ), we need to tell the `hitd-static` service which folder to serve. first, lets stop the service.
 
 `stop hitd-static`
 
-In order to go further, we need to understand how works configuration.
-Using `getconf`, you can see the configuration which will be passed to services launch at this point.
-At this point, `getconf` should return `{"heartbeat":30}`, which is the default Configuration that we choose. heartbeat is a pigato parameter defining rate a which pigato nodes send themself hearbeat messages.
+In order to go further, we need to understand how configuration works.
 
-the parameter to change the folder served by hitd-static is 'static_cwd'. to change it, you can use the `setconf` command.
+Using `getconf`, you can see the configuration which will be passed to services launch at this point. So, `getconf` should return `{"heartbeat":30}`, which is the default configuration that we choose. `heartbeat` is a Pigato parameter defining rate a which Pigato nodes send themselves heartbeat messages.
 
-`setconf static_cwd <foldertoserve>` , for example
-`setconf stati_cwd ~/mywebsite`
+The parameter to change the folder served by `hitd-static` is 'static_cwd'. to change it, you can use the `setconf` command.
+
+`setconf static_cwd <foldertoserve>` , for example`setconf static_cwd ~/mywebsite`
 
 Now that you defined the folder to serve, lets relaunch the `hitd-static` service.
 
@@ -114,7 +110,7 @@ The main goal of *hitd* is to reduce the gap between specification and implement
 
 The final goal (but we are still very far from it), would be to transform specification to code. Following this dream, we are also currently working on a graph based interface for building microservices architecture.
 
-We provide some basic microservices, enough so you can deploy some basic applications without developing any new one. For any application with a non trivial business logic, you'll of course need to create at some point [your own microservices](#Creating-my-own-microservice). Yet while you, or your organization, will create more and more microservices, the need to develop new ones will be decreased as a good microservice provides more re-use than monolithical code.
+We provide some basic microservices, enough so you can deploy some basic applications without developing any new one. For any application with a non trivial business logic, you'll of course need to create at some point [your own microservices](#creating-my-own-microservice). Yet, while you, or your organization, will create more and more microservices, the need to develop new ones will be decreased as a good microservice provides more re-use than monolothic code.
 
 Great Tooling
 -------------
@@ -125,7 +121,7 @@ One of the tools we love the most, is `hitd-reload`. It **allows you to dynamica
 
 We also developed some tools, *ie* `hitd-launch` to dynamically install and load a microservice on a node.
 
-All of this is described [below](#Tooling).
+All of this is described [below](#tooling).
 
 Nanoservice Compliant
 ---------------------
@@ -179,21 +175,26 @@ For example, there are 3 main technical components :
 
 Both, the clients and the handlers register on the router, which is the they can communicate together. When a client emits a request, the router chooses the right handler and forwards the request to it. Once the handler processed the request, the response is sent back to the router, then to the client.
 
+```
 Request : Client -> Router -> Handler
 
 Response : Client <- Router <- Handler
+```
 
 #### Composition
 
 If a microservice needs another microservice, then the Handler can instantiate and act as a Client.
 
+```
 Request : Client -> Router <- ( Handler + Client ) -> Router -> Handler
 
 Response : Client -> Router <- ( Handler + Client ) <- Router <- Handler
+```
 
 The two routers could be the same, or they could be different.
 
-### Give me some Code
+Give me some Code
+=================
 
 Client
 ------
