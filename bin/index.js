@@ -31,7 +31,7 @@ program
   .version('0.0.1')
   .option('-n, --noconfig', 'don\'t look for config file')
   .option('-c, --config [file]', 'config file for your application')
-  .option('-e, --endpoint [endpoint]', 'Internal ednpoint for this daemonn',
+  .option('-e, --endpoint [endpoint]', 'Internal endpoint for this daemonn',
     'ipc:///tmp/hitd-' + process.pid
   )
   .option('-d, --debug [debug]', 'Debug flag for your application []',
