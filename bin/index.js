@@ -45,6 +45,8 @@ program
 
 
 if(program.nodeDebug) {
+  // useful for debugging :
+  //```$> hitd -v -d 'hitd-*' -D -x```
   process.kill(process.pid, 'SIGUSR1');
 }
 
@@ -55,7 +57,9 @@ process.nextTick(function(){
 
   var Debug = require('hitd-debug');
 
-  Debug.enable((program.verbose ? 'hitd,' : '') + program.debug);
+  Debug.enable(
+    [process.env.DEBUG ,(program.verbose ? 'hitd,' : '') + program.debug].join()
+  );
   var debug = Debug('hitd');
 
 
