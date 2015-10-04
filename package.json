@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "A devOps microservices toolkit in node.js",
   "main": "index.js",
+  "bin": {
+    "hitd": "./bin/index.js"
+  },
   "scripts": {
     "start": "node bin/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,5 +17,16 @@
     "commander": "^2.8.1",
     "js-yaml": "^3.4.2",
     "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "hitd-router": "git+https://github.com/hitd/hitd-router",
+    "hitd-client": "git+https://github.com/hitd/hitd-client",
+    "hitd-debug": "git+https://github.com/hitd/hitd-debug",
+    "hitd-front": "git+https://github.com/hitd/hitd-front",
+    "hitd-handler": "git+https://github.com/hitd/hitd-handler",
+    "hitd-launcher": "git+https://github.com/hitd/hitd-launcher",
+    "hitd-log404": "git+https://github.com/hitd/hitd-log404",
+    "hitd-static": "git+https://github.com/hitd/hitd-static",
+    "hitd-vantage": "git+https://github.com/hitd/hitd-vantage"
   }
 }
