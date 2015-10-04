@@ -94,7 +94,7 @@ var launchConfigFileIfNeeded = function(program, cb) {
 var vantageIfNeeded = function(program, internalEndpoint, internalConf, cb) {
 
   if (program.daemon) {
-    cb(null);
+    return cb(null);
   }
 
   //vantage if needed
