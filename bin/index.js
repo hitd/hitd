@@ -36,13 +36,10 @@ program
   )
   .option('-d, --debug [debug]', 'Debug flag for your application []',
     '')
-  .option('-v, --verbose',
-    'config file for your application = \'-d zone522\'')
-  .option('-w, --watch',
-    'watch file and automatically reload microservices if their file changed'
+  .option('-v, --verbose', 'add verbose logs')
+  .option('-w, --watch', 'watch files and automatically reload microservices if their files change'
   )
-  .option('-D, --daemon',
-    'don\'t show the REPl')
+  .option('-D, --daemon', 'don\'t show the REPl')
   .parse(process.argv);
 
 
