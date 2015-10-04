@@ -31,18 +31,15 @@ program
   .version('0.0.1')
   .option('-n, --noconfig', 'don\'t look for config file')
   .option('-c, --config [file]', 'config file for your application')
-  .option('-e, --endpoint [endpoint]', 'Internal ednpoint for this daemonn',
+  .option('-e, --endpoint [endpoint]', 'Internal endpoint for this daemonn',
     'ipc:///tmp/hitd-' + process.pid
   )
   .option('-d, --debug [debug]', 'Debug flag for your application []',
     '')
-  .option('-v, --verbose',
-    'config file for your application = \'-d zone522\'')
-  .option('-w, --watch',
-    'watch file and automatically reload microservices if their file changed'
+  .option('-v, --verbose', 'add verbose logs')
+  .option('-w, --watch', 'watch files and automatically reload microservices if their files change'
   )
-  .option('-D, --daemon',
-    'don\'t show the REPl')
+  .option('-D, --daemon', 'don\'t show the REPl')
   .parse(process.argv);
 
 
