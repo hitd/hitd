@@ -36,228 +36,236 @@ program
   )
   .option('-d, --debug [debug]', 'Debug flag for your application []',
     '')
-  .option('-v, --verbose',
-    'config file for your application = \'-d zone522\'')
-  .option('-w, --watch',
-    'watch file and automatically reload microservices if their file changed'
+  .option('-x, --node-debug', 'Run hitd so it can be debugged through node debugger')
+  .option('-v, --verbose', 'add verbose logs')
+  .option('-w, --watch', 'watch files and automatically reload microservices if their files change'
   )
-  .option('-D, --daemon',
-    'don\'t show the REPl')
+  .option('-D, --daemon', 'don\'t show the REPl')
   .parse(process.argv);
 
 
-var fs = require('fs');
-var async = require('async'),
-  _ = require('underscore');
-
-var Debug = require('hitd-debug');
-
-Debug.enable((program.verbose ? 'hitd,' : '') + program.debug);
-var debug = Debug('hitd');
-
-
-var internalEndpoint = program.endpoint;
-var internalConf = {
-  heartbeat: 30
-};
-
-var internal = require('../lib/internal.js');
-
-
-var launchConfigFileIfNeeded = function(program, cb) {
-  if (program.noconfig) {
-    return cb(null);
-  }
-
-  var configParser = require('../lib/config.js');
-
-  configParser.openFile(program.config || 'hitd.yml', function(err, file) {
-    if (err && err.code == 'ENOENT' && !program.config) {
-      debug('default file not found don\t start anything')
-      cb(null);
-    } else if (err) {
-      cb(err);
-    } else {
-      //file founded, let pars it
-
-      configParser.parseYMLFile(file, function(err, startConf) {
-        if (err) {
-          cb(err);
-        }
-        launchStartConf(startConf, function(err) {
-          cb(err);
-        });
-      });
-
-    }
-  });
-};
-
-
-var vantageIfNeeded = function(program, internalEndpoint, internalConf, cb) {
-
-  if (program.daemon) {
-    cb(null);
-  }
-
-  //vantage if needed
-  var vantage = require('hitd-vantage');
-  vantage(internalEndpoint, _.extend({
-      delimiter: 'hitd~',
-      'port': 8787
-    }, internalConf),
-    function(err, vantage) {
-      if (err) {
-        return cb(err);
-      }
-      vantage.show();
-      cb(null);
-    });
-};
-
-
-
-//launch internal
-internal(internalEndpoint, internalConf, function(err, client) {
-  debug('internal launched', err);
-  console.log("Listening on", internalEndpoint, '\n');
-
-  vantageIfNeeded(program, internalEndpoint, internalConf, function() {
-    //console.log("vantage");
-
-    launchConfigFileIfNeeded(program, function(err) {
-      //console.log('done');
-
-    });
-  });
-});
-
-
-
-function launchStartConf(conf, cb) {
-  async.each(conf.Bindings, function(binding, cb) {
-    launchBinding(conf.Default, binding, cb);
-  }, function() {
-    console.log("Every Binding correctly stated");
-
-  });
-};
-/*
-if (program.watch) {
-  client.request('hitd-launcher/launch', {
-    name: 'hitd-relaunch',
-    endpoint: internalEndpoint,
-    conf: internalConf
-  }, function() {
-    debug('watching file for reload');
-    cb(null);
-  });
+if(program.nodeDebug) {
+  // useful for debugging :
+  //```$> hitd -v -d 'hitd-*' -D -x```
+  process.kill(process.pid, 'SIGUSR1');
 }
- */
-/*
-configParser.parse(program.config, function(err, conf) {
-    console.log("parse file", err, conf);
-    if (err) {
-      debug('err while parsing', err);
 
-      cb(null);
+process.nextTick(function(){
+  var fs = require('fs');
+  var async = require('async'),
+    _ = require('underscore');
+
+  var Debug = require('hitd-debug');
+
+  Debug.enable(
+    [process.env.DEBUG ,(program.verbose ? 'hitd,' : '') + program.debug].join()
+  );
+  var debug = Debug('hitd');
+
+
+  var internalEndpoint = program.endpoint;
+  var internalConf = {
+    heartbeat: 30
+  };
+
+  var internal = require('../lib/internal.js');
+
+
+  var launchConfigFileIfNeeded = function(program, cb) {
+    if (program.noconfig) {
+      return cb(null);
     }
-    async.each(conf.Bindings, function(binding, cb) {
-        launchBinding(conf.Default, binding, cb);
-      }, function() {
-        console.log("Every Binding correctly stated");
 
-        if (program.watch) {
-          client.request('hitd-launcher/launch', {
-            name: 'hitd-relaunch',
-            endpoint: internalEndpoint,
-            conf: internalConf
-          }, function() {
-            debug('watching file for reload');
-            cb(null);
+    var configParser = require('../lib/config.js');
+
+    configParser.openFile(program.config || 'hitd.yml', function(err, file) {
+      if (err && err.code == 'ENOENT' && !program.config) {
+        debug('default file not found don\'t start anything')
+        cb(null);
+      } else if (err) {
+        cb(err);
+      } else {
+        //file founded, let pars it
+
+        configParser.parseYMLFile(file, function(err, startConf) {
+          if (err) {
+            cb(err);
+          }
+          launchStartConf(startConf, function(err) {
+            cb(err);
           });
-        };
-
-
+        });
 
       }
-
-      internal(internalEndpoint, internalConf, function(err, client) {
-        debug('internal launched', err);
-        console.log("Listening on ", internalEndpoint);
-
-        console.log("launch vantage");
-        var vantage = require('hitd-vantage');
+    });
+  };
 
 
-        vantage(internalEndpoint, _.extend({
-            delimiter: 'hitd~',
-            'port': 8787
-          }, internalConf),
-          function(err, vantage) {
+  var vantageIfNeeded = function(program, internalEndpoint, internalConf, cb) {
 
+    if (program.daemon) {
+      return cb(null);
+    }
 
-            console.log("did vantage", err);
-            program.daemon || vantage.show();
-          });
+    //vantage if needed
+    var vantage = require('hitd-vantage');
+    vantage(internalEndpoint, _.extend({
+        delimiter: 'hitd~',
+        'port': 8787
+      }, internalConf),
+      function(err, vantage) {
+        if (err) {
+          return cb(err);
+        }
+        vantage.show();
+        cb(null);
       });
-});*/
+  };
 
-function launchBinding(defaultConf, binding, cb) {
-  // we launch the router, then the nodes
 
-  var bindingOnlyConf = _.clone(binding);
-  delete bindingOnlyConf.nodes;
 
-  var bindingConf = _.extend(_.clone(defaultConf), bindingOnlyConf);
-  delete bindingConf.name;
-  debug('will request launching binding');
-  client.request('hitd-launcher/launch', {
-    name: 'hitd-router',
-    endpoint: binding.endpoint,
-    conf: bindingConf
-  }, function(err) {
-    debug('router launched', err);
-    async.each(binding.nodes || binding.workers, function(node,
-        cb) {
+  //launch internal
+  internal(internalEndpoint, internalConf, function(err, client) {
+    debug('internal launched', err);
+    console.log("Listening on", internalEndpoint, '\n');
 
-        var conf = _.extend(bindingConf, node);
-        delete conf.name;
-        debug('will start node %s ', node.name);
-        client.request('hitd-launcher/launch', {
-            name: node.name,
-            endpoint: binding.endpoint,
-            conf: conf
-          },
-          function(err,
-            body, code) {
-            debug("did start node %s ", node.name);
-            cb();
-          });
-      },
-      function() {
-        debug(
-          'Everything Worker correctly started for binding %s',
-          binding.name);
-        async.eachSeries(binding.clients, function(clientConf,
+    vantageIfNeeded(program, internalEndpoint, internalConf, function() {
+      //console.log("vantage");
+
+      launchConfigFileIfNeeded(program, function(err) {
+        //console.log('done');
+
+      });
+    });
+  });
+
+
+
+  function launchStartConf(conf, cb) {
+    async.each(conf.Bindings, function(binding, cb) {
+      launchBinding(conf.Default, binding, cb);
+    }, function() {
+      console.log("Every Binding correctly stated");
+
+    });
+  };
+  /*
+  if (program.watch) {
+    client.request('hitd-launcher/launch', {
+      name: 'hitd-relaunch',
+      endpoint: internalEndpoint,
+      conf: internalConf
+    }, function() {
+      debug('watching file for reload');
+      cb(null);
+    });
+  }
+   */
+  /*
+  configParser.parse(program.config, function(err, conf) {
+      console.log("parse file", err, conf);
+      if (err) {
+        debug('err while parsing', err);
+
+        cb(null);
+      }
+      async.each(conf.Bindings, function(binding, cb) {
+          launchBinding(conf.Default, binding, cb);
+        }, function() {
+          console.log("Every Binding correctly stated");
+
+          if (program.watch) {
+            client.request('hitd-launcher/launch', {
+              name: 'hitd-relaunch',
+              endpoint: internalEndpoint,
+              conf: internalConf
+            }, function() {
+              debug('watching file for reload');
+              cb(null);
+            });
+          };
+
+
+
+        }
+
+        internal(internalEndpoint, internalConf, function(err, client) {
+          debug('internal launched', err);
+          console.log("Listening on ", internalEndpoint);
+
+          console.log("launch vantage");
+          var vantage = require('hitd-vantage');
+
+
+          vantage(internalEndpoint, _.extend({
+              delimiter: 'hitd~',
+              'port': 8787
+            }, internalConf),
+            function(err, vantage) {
+
+
+              console.log("did vantage", err);
+              program.daemon || vantage.show();
+            });
+        });
+  });*/
+
+  function launchBinding(defaultConf, binding, cb) {
+    // we launch the router, then the nodes
+
+    var bindingOnlyConf = _.clone(binding);
+    delete bindingOnlyConf.nodes;
+
+    var bindingConf = _.extend(_.clone(defaultConf), bindingOnlyConf);
+    delete bindingConf.name;
+    debug('will request launching binding');
+    client.request('hitd-launcher/launch', {
+      name: 'hitd-router',
+      endpoint: binding.endpoint,
+      conf: bindingConf
+    }, function(err) {
+      debug('router launched', err);
+      async.each(binding.nodes || binding.workers, function(node,
           cb) {
-          var conf = _.extend(bindingConf, clientConf);
-          delete conf.name;
 
+          var conf = _.extend(bindingConf, node);
+          delete conf.name;
+          debug('will start node %s ', node.name);
           client.request('hitd-launcher/launch', {
-              name: clientConf.name,
+              name: node.name,
               endpoint: binding.endpoint,
-              conf: clientConf
+              conf: conf
             },
             function(err,
-              code, body) {
-              debug("did start client %s ", clientConf.name);
+              body, code) {
+              debug("did start node %s ", node.name);
               cb();
             });
-        }, function() {
-          debug("Everything Client correctly stated");
-          cb();
+        },
+        function() {
+          debug(
+            'Everything Worker correctly started for binding %s',
+            binding.name);
+          async.eachSeries(binding.clients, function(clientConf,
+            cb) {
+            var conf = _.extend(bindingConf, clientConf);
+            delete conf.name;
+
+            client.request('hitd-launcher/launch', {
+                name: clientConf.name,
+                endpoint: binding.endpoint,
+                conf: clientConf
+              },
+              function(err,
+                code, body) {
+                debug("did start client %s ", clientConf.name);
+                cb();
+              });
+          }, function() {
+            debug("Everything Client correctly stated");
+            cb();
+          });
         });
-      });
-  });
-}
+    });
+  }
+})
